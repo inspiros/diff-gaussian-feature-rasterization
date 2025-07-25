@@ -176,15 +176,14 @@ class GaussianFeaturesRasterizer(nn.Module):
         super().__init__()
         self.raster_settings = raster_settings
 
-    def markVisible(self, positions: torch.Tensor):
+    @torch.no_grad()
+    def mark_visible(self, positions: torch.Tensor):
         # Mark visible points (based on frustum culling for camera) with a boolean
-        with torch.no_grad():
-            raster_settings = self.raster_settings
-            visible = _C.mark_visible(
-                positions,
-                raster_settings.viewmatrix,
-                raster_settings.projmatrix)
-
+        raster_settings = self.raster_settings
+        visible = _C.mark_visible(
+            positions,
+            raster_settings.viewmatrix,
+            raster_settings.projmatrix)
         return visible
 
     def forward(self,

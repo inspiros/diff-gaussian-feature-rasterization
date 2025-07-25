@@ -181,10 +181,10 @@ torch::Tensor rasterizeGaussiansFilterCUDA(
 	const int image_width,
 	const bool prefiltered,
 	const bool debug) {
+	at::NoGradGuard g;
 	TORCH_CHECK_VALUE(
 		means3D.ndimension() == 2 && means3D.size(1) == 3,
 		"means3D must have dimensions (num_points, 3)");
-	at::NoGradGuard g;
 
 	const int P = means3D.size(0);
 	const int H = image_height;
@@ -223,6 +223,7 @@ torch::Tensor markVisible(
     torch::Tensor& means3D,
     torch::Tensor& viewmatrix,
     torch::Tensor& projmatrix) {
+	at::NoGradGuard g;
     const int P = means3D.size(0);
 
     torch::Tensor present = torch::full({P}, false, means3D.options().dtype(at::kBool));
