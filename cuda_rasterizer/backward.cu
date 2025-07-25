@@ -494,7 +494,7 @@ void BACKWARD::render(
 	float4* dL_dconic2D,
 	float* dL_dopacity,
 	float* dL_dfeatures) {
-    DGRF_DISPATCH_PREDEFINED_CHANNELS(channels, "BACKWARD::render", ([&] {
+    DGFR_DISPATCH_PREDEFINED_CHANNELS(channels, "BACKWARD::render", ([&] {
         const dim3 grid((W + block_resolution - 1) / block_resolution, (H + block_resolution - 1) / block_resolution, 1);
         const dim3 block(block_resolution, block_resolution, 1);
 

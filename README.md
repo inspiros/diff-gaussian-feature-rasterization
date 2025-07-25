@@ -44,7 +44,7 @@ with a desired block size, then concatenate the rendered features outputs afterw
 First, please check and add your predefined dimension to the list in `cuda_rasterizer/config.h` before compiling:
 
 ```C++
-#define DGRF_PREDEFINED_CHANNELS 1, 2, 3, 4, 6, 8, 10, 12, 16, 24, 32, 48, 50, 64, 100, 128, 256, 512, 1024, 2048
+#define DGFR_PREDEFINED_CHANNELS 1, 2, 3, 4, 6, 8, 10, 12, 16, 24, 32, 48, 50, 64, 100, 128, 256, 512, 1024, 2048
 ```
 
 Then to install, run (requires C++ and CUDA compilers):

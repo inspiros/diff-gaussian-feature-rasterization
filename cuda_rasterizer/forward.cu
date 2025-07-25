@@ -385,7 +385,7 @@ void FORWARD::render(
 	uint32_t* n_contrib,
 	const float* bg_features,
 	float* out_features) {
-    DGRF_DISPATCH_PREDEFINED_CHANNELS(channels, "FORWARD::render", ([&] {
+    DGFR_DISPATCH_PREDEFINED_CHANNELS(channels, "FORWARD::render", ([&] {
         renderCUDA<num_channels, block_resolution><<<grid, block>>>(
             ranges,
             point_list,
@@ -422,7 +422,7 @@ void FORWARD::preprocess(
 	const dim3 grid,
 	uint32_t* tiles_touched,
 	bool prefiltered) {
-    DGRF_DISPATCH_PREDEFINED_CHANNELS(channels, "FORWARD::preprocess", ([&] {
+    DGFR_DISPATCH_PREDEFINED_CHANNELS(channels, "FORWARD::preprocess", ([&] {
         preprocessCUDA<block_resolution><<<(P + 255) / 256, 256>>>(
             P,
             means3D,
@@ -464,7 +464,7 @@ void FORWARD::filter_preprocess(
 	const dim3 grid,
 	bool prefiltered) {
 	// TODO: check if it is truely unnecessary to dispatch here
-    filter_preprocessCUDA<DGRF_BLOCK_RESOLUTION><<<(P + 255) / 256, 256>>>(
+    filter_preprocessCUDA<DGFR_BLOCK_RESOLUTION><<<(P + 255) / 256, 256>>>(
 		P,
 		means3D,
 		scales,

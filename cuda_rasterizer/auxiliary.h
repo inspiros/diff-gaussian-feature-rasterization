@@ -14,8 +14,7 @@
 #include "config.h"
 #include "stdio.h"
 
-#define DGRF_BLOCK_SIZE (DGRF_BLOCK_RESOLUTION * DGRF_BLOCK_RESOLUTION)
-#define DGRF_NUM_WARPS (DGRF_BLOCK_SIZE / 32)
+#define DGFR_BLOCK_SIZE (DGFR_BLOCK_RESOLUTION * DGFR_BLOCK_RESOLUTION)
 
 __forceinline__ __device__ float ndc2Pix(float v, int S) {
 	return ((v + 1.0) * S - 1.0) * 0.5;

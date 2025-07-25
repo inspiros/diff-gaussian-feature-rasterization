@@ -216,13 +216,13 @@ int CudaRasterizer::Rasterizer::forward(
 	}
 
     dim3 tile_grid, block;
-    DGRF_DISPATCH_PREDEFINED_CHANNELS(channels, "CudaRasterizer::Rasterizer::forward", ([&] {
-        if constexpr (block_size != DGRF_BLOCK_SIZE)
+    DGFR_DISPATCH_PREDEFINED_CHANNELS(channels, "CudaRasterizer::Rasterizer::forward", ([&] {
+        if constexpr (block_size != DGFR_BLOCK_SIZE)
             TORCH_WARN_ONCE("Due to large number of channels, ",
                 "Rasterizer switched to a smaller block size of ",
                 block_resolution, "×", block_resolution,
                 " while preferred block size is ",
-                DGRF_BLOCK_RESOLUTION, "×", DGRF_BLOCK_RESOLUTION, ".");
+                DGFR_BLOCK_RESOLUTION, "×", DGFR_BLOCK_RESOLUTION, ".");
 
         tile_grid = {(width + block_resolution - 1) / block_resolution, (height + block_resolution - 1) / block_resolution, 1};
         block = {block_resolution, block_resolution, 1};
@@ -271,7 +271,7 @@ int CudaRasterizer::Rasterizer::forward(
 
 	// For each instance to be rendered, produce adequate [ tile | depth ] key 
 	// and corresponding dublicated Gaussian indices to be sorted
-    DGRF_DISPATCH_PREDEFINED_CHANNELS(channels, "CudaRasterizer::Rasterizer::forward", ([&] {
+    DGFR_DISPATCH_PREDEFINED_CHANNELS(channels, "CudaRasterizer::Rasterizer::forward", ([&] {
         duplicateWithKeys<block_resolution><<<(P + 255) / 256, 256>>>(
             P,
             geomState.means2D,
@@ -433,8 +433,8 @@ void CudaRasterizer::Rasterizer::visible_filter(
 	if (radii == nullptr)
 		radii = geomState.internal_radii;
 
-	const dim3 tile_grid((width + DGRF_BLOCK_RESOLUTION - 1) / DGRF_BLOCK_RESOLUTION,
-						 (height + DGRF_BLOCK_RESOLUTION - 1) / DGRF_BLOCK_RESOLUTION, 1);
+	const dim3 tile_grid((width + DGFR_BLOCK_RESOLUTION - 1) / DGFR_BLOCK_RESOLUTION,
+						 (height + DGFR_BLOCK_RESOLUTION - 1) / DGFR_BLOCK_RESOLUTION, 1);
 
 	// Run preprocessing per-Gaussian (transformation, bounding)
 	CHECK_CUDA(FORWARD::filter_preprocess(
