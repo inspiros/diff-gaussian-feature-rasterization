@@ -33,7 +33,7 @@ static constexpr uint32_t get_block_resolution() {
     else if constexpr (C <= DGRF_GET_MAX_CHANNELS(1 * 1))
         return 1;
     else
-        static_assert(false, "too large channels");
+        static_assert(C <= DGRF_GET_MAX_CHANNELS(1 * 1), "too large channels");
 }
 
 template<uint32_t C>
@@ -41,12 +41,12 @@ static constexpr uint32_t get_block_size() {
     return get_block_resolution<C>() * get_block_resolution<C>();
 }
 
-#define DGRF_DISPATCH_CASE(C, ...)              \
-  case (C): {                                   \
+#define DGRF_DISPATCH_CASE(C, ...)                               \
+  case (C): {                                                    \
     [[maybe_unused]] static constexpr uint32_t num_channels = C; \
     [[maybe_unused]] static constexpr auto block_resolution = get_block_resolution<num_channels>(); \
     [[maybe_unused]] static constexpr auto block_size = block_resolution * block_resolution; \
-    return __VA_ARGS__();                       \
+    return __VA_ARGS__();                                        \
   }
 
 #define DGRF_DISPATCH_SWITCH(C, NAME, ...)           \

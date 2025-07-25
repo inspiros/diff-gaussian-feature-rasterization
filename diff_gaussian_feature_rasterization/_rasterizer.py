@@ -103,7 +103,7 @@ class _RasterizeGaussiansFeatures(torch.autograd.Function):
         return rendered_features, radii
 
     @staticmethod
-    def backward(ctx, out_grad, _):
+    def backward(ctx, grad_out, _):
 
         # Restore necessary values from context
         num_rendered = ctx.num_rendered
@@ -124,7 +124,7 @@ class _RasterizeGaussiansFeatures(torch.autograd.Function):
                 raster_settings.projmatrix,
                 raster_settings.tanfovx,
                 raster_settings.tanfovy,
-                out_grad,
+                grad_out,
                 geomBuffer,
                 num_rendered,
                 binningBuffer,
