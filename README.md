@@ -26,7 +26,7 @@ and select them at runtime.
 Originally, the rasterizer uses a block of $16 \times 16$.
 In the backward pass, there is a shared memory array which has size grow linearly with this block size.
 Hence, for higher dimensional feature vectors, we have to dynamically select a smaller block size
-(i.e. $8 \times 8$, $4 \times 4$, ...) so that the shared memory belows the limit of 48KB.
+(i.e. $8 \times 8$, $4 \times 4$, ...) so that the shared memory is below the limit of 48KB.
 See [this stackoverflow issue](https://stackoverflow.com/questions/23648525/cuda-ptxas-error-function-uses-too-much-shared-data).
 
 The maximum dimension that fits a block resolution $b$ (assuming that block size is $b \times b$ as implemented)
