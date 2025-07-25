@@ -24,7 +24,7 @@ and select them at runtime.
 Originally, the rasterizer uses a block of $16 \times 16$.
 In the backward pass, there is a shared memory array which has size grow linearly with this block size.
 Hence, for higher dimensional feature vectors, we have to dynamically select a smaller block size
-(i.e. $8 \times 8$, $4 \times 4$) so that the shared memory belows the limit of 48KB.
+(i.e. $8 \times 8$, $4 \times 4$, ...) so that the shared memory belows the limit of 48KB.
 See [this stackoverflow issue](https://stackoverflow.com/questions/23648525/cuda-ptxas-error-function-uses-too-much-shared-data).
 
 The maximum dimension that fits a block resolution $b$ (assuming that block size is $b \times b$ as implemented)
@@ -62,12 +62,12 @@ features_raster_settings = GaussianFeaturesRasterizationSettings(
     image_width=int(viewpoint_camera.image_width),
     tanfovx=tanfovx,
     tanfovy=tanfovy,
-    bg=torch.new_zeros([features.size(-1)]),
     scale_modifier=scaling_modifier,
     viewmatrix=viewpoint_camera.world_view_transform,
     projmatrix=viewpoint_camera.full_proj_transform,
     prefiltered=False,
-    debug=pipe.debug
+    debug=pipe.debug,
+    # bg=None,  # [optional] treated as 0 if not declared
 )
 features_rasterizer = GaussianFeaturesRasterizer(raster_settings=features_raster_settings)
 
@@ -75,8 +75,7 @@ features_rasterizer = GaussianFeaturesRasterizer(raster_settings=features_raster
 rendered_features, radii = features_rasterizer(
     means3D=xyz,
     means2D=screenspace_points,
-    shs=None,
-    colors_precomp=features,
+    features=features,
     opacities=opacity,
     scales=scaling,
     rotations=rot,

@@ -9,10 +9,11 @@
 # For inquiries contact  george.drettakis@inria.fr
 #
 
-from typing import NamedTuple, Tuple, Optional
+from typing import Sequence, NamedTuple, Tuple, Optional
 
 import torch
 import torch.nn as nn
+from torch.types import Number
 
 from . import _C
 
@@ -23,9 +24,33 @@ __all__ = [
 ]
 
 
-def cpu_deep_copy_tuple(input_tuple):
+def _cpu_deep_copy_tuple(input_tuple):
     copied_tensors = [item.cpu().clone() if isinstance(item, torch.Tensor) else item for item in input_tuple]
     return tuple(copied_tensors)
+
+
+def _get_background(bg, features: torch.Tensor) -> torch.Tensor:
+    d = features.size(-1)
+    if bg is None:
+        return features.new_zeros([d])
+    elif isinstance(bg, torch.Tensor):
+        if bg.numel() == d:
+            return bg.flatten()
+        elif bg.numel() == 1:
+            return features.new_full([d], bg.item())
+        else:
+            raise ValueError('background must have the same dimensions as features')
+    elif isinstance(bg, Sequence):
+        if len(bg) == d:
+            return torch.tensor(bg, dtype=features.dtype, device=features.device)
+        elif len(bg) == 1:
+            return features.new_full([d], bg[0])
+        else:
+            raise ValueError('background must have the same dimensions as features')
+    elif isinstance(bg, Number):
+        return features.new_full([d], bg)
+    else:
+        raise ValueError('background must be a torch.Tensor, number, or sequence of numbers')
 
 
 def rasterize_gaussians_features(
@@ -35,7 +60,7 @@ def rasterize_gaussians_features(
         opacities: torch.Tensor,
         scales: torch.Tensor,
         rotations: torch.Tensor,
-        cov3Ds_precomp: torch.Tensor,
+        cov3Ds_precomp: Optional[torch.Tensor],
         raster_settings: 'GaussianFeaturesRasterizationSettings') -> Tuple[torch.Tensor, torch.Tensor]:
     return _RasterizeGaussiansFeatures.apply(
         means3D,
@@ -64,7 +89,7 @@ class _RasterizeGaussiansFeatures(torch.autograd.Function):
 
         # Restructure arguments the way that the C++ lib expects them
         args = (
-            raster_settings.bg,
+            _get_background(raster_settings.bg, features),
             means3D,
             features,
             opacities,
@@ -83,7 +108,7 @@ class _RasterizeGaussiansFeatures(torch.autograd.Function):
         )
         # Invoke C++/CUDA rasterizer
         if raster_settings.debug:
-            cpu_args = cpu_deep_copy_tuple(args)  # Copy them before they can be corrupted
+            cpu_args = _cpu_deep_copy_tuple(args)  # Copy them before they can be corrupted
             try:
                 num_rendered, rendered_features, radii, geomBuffer, binningBuffer, imgBuffer = \
                     _C.rasterize_gaussians_features(*args)
@@ -112,28 +137,30 @@ class _RasterizeGaussiansFeatures(torch.autograd.Function):
          geomBuffer, binningBuffer, imgBuffer) = ctx.saved_tensors
 
         # Restructure args as C++ method expects them
-        args = (raster_settings.bg,
-                means3D,
-                radii,
-                features,
-                scales,
-                rotations,
-                raster_settings.scale_modifier,
-                cov3Ds_precomp,
-                raster_settings.viewmatrix,
-                raster_settings.projmatrix,
-                raster_settings.tanfovx,
-                raster_settings.tanfovy,
-                grad_out,
-                geomBuffer,
-                num_rendered,
-                binningBuffer,
-                imgBuffer,
-                raster_settings.debug)
+        args = (
+            _get_background(raster_settings.bg, features),
+            means3D,
+            radii,
+            features,
+            scales,
+            rotations,
+            raster_settings.scale_modifier,
+            cov3Ds_precomp,
+            raster_settings.viewmatrix,
+            raster_settings.projmatrix,
+            raster_settings.tanfovx,
+            raster_settings.tanfovy,
+            grad_out,
+            geomBuffer,
+            num_rendered,
+            binningBuffer,
+            imgBuffer,
+            raster_settings.debug,
+        )
 
         # Compute gradients for relevant tensors by invoking backward method
         if raster_settings.debug:
-            cpu_args = cpu_deep_copy_tuple(args)  # Copy them before they can be corrupted
+            cpu_args = _cpu_deep_copy_tuple(args)  # Copy them before they can be corrupted
             try:
                 grad_means2D, grad_features, grad_opacities, grad_means3D, grad_cov3Ds_precomp, grad_scales, grad_rotations = \
                     _C.rasterize_gaussians_features_backward(*args)
@@ -163,12 +190,12 @@ class GaussianFeaturesRasterizationSettings(NamedTuple):
     image_width: int
     tanfovx: float
     tanfovy: float
-    bg: torch.Tensor
     scale_modifier: float
     viewmatrix: torch.Tensor
     projmatrix: torch.Tensor
     prefiltered: bool
-    debug: bool
+    debug: bool = False
+    bg: Optional[torch.Tensor] = None
 
 
 class GaussianFeaturesRasterizer(nn.Module):
@@ -195,9 +222,6 @@ class GaussianFeaturesRasterizer(nn.Module):
                 rotations: Optional[torch.Tensor] = None,
                 cov3D_precomp: Optional[torch.Tensor] = None) -> Tuple[torch.Tensor, torch.Tensor]:
         raster_settings = self.raster_settings
-
-        if features is None:
-            raise ValueError('Please provide features!')
 
         if ((scales is None or rotations is None) and cov3D_precomp is None) or (
                 (scales is not None or rotations is not None) and cov3D_precomp is not None):
