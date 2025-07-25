@@ -7,10 +7,10 @@ This is a modified Gaussian rasterization submodule that can rasterize _arbitrar
 $f\in\mathbb{R}^{\left|\mathcal{G}\right| \times d}$ attached to Gaussians $\mathcal{G}$ into a 2D feature image
 $F\in\mathbb{R}^{d \times h \times w}$ whose elements $F(p)$ is computed as:
 
-[^1]: You have to register all expected $d$, and the maximum $d$ is actually $d=12281$, see [this section](#runtime-dynamic-block-resolution).
+[^1]: You have to register all expected dimensionalities, and the maximum dimension is actually 12281, see [this section](#runtime-dynamic-block-resolution).
 
 ```math
-F(p) = \sum_{i=1}^{\left|\mathcal{G}_p\right|}{f_{g_i} \alpha_{g_i} \sum_{j=1}^{i - 1}{\left(1 - \alpha_{g_j}\right)}}
+F(p) = \sum_{i=1}^{\left|\mathcal{G}_p\right|}{f_{g_i} \cdot \alpha_{g_i} \sum_{j=1}^{i - 1}{\left(1 - \alpha_{g_j}\right)}}
 ```
 
 #### Registering Feature Dimensions
