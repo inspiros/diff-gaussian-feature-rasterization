@@ -13,6 +13,8 @@ $F\in\mathbb{R}^{d \times h \times w}$ whose elements $F(p)$ is computed as:
 F(p) = \sum_{i=1}^{\left|\mathcal{G}_p\right|}{f_{g_i} \cdot \alpha_{g_i} \sum_{j=1}^{i - 1}{\left(1 - \alpha_{g_j}\right)}}
 ```
 
+In other words, instead of splatting Spherical Harmonics/precomputed colors, we splat the features.
+
 #### Registering Feature Dimensions
 
 Due to limitations of the algorithm and CUDA, dimensionality of the feature vector must be known at compile time.
