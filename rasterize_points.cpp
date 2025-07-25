@@ -48,7 +48,7 @@ rasterizeGaussiansFeaturesCUDA(
 	const bool prefiltered,
 	const bool debug) {
     TORCH_CHECK_VALUE(
-    	means3D.ndimension() != 2 || means3D.size(1) != 3,
+    	means3D.ndimension() == 2 && means3D.size(1) == 3,
     	"means3D must have dimensions (num_points, 3)");
 
     const int channels = features.size(1);
@@ -182,7 +182,7 @@ torch::Tensor rasterizeGaussiansFilterCUDA(
 	const bool prefiltered,
 	const bool debug) {
 	TORCH_CHECK_VALUE(
-		means3D.ndimension() != 2 || means3D.size(1) != 3,
+		means3D.ndimension() == 2 && means3D.size(1) == 3,
 		"means3D must have dimensions (num_points, 3)");
 	at::NoGradGuard g;
 
