@@ -15,6 +15,10 @@ F(p) = \sum_{i=1}^{\left|\mathcal{G}_p\right|}{f_{g_i} \cdot \alpha_{g_i} \sum_{
 
 In other words, instead of splatting Spherical Harmonics/precomputed colors, we splat the features.
 
+> [!NOTE]
+> This has already been implemented in other existing works, but they usually constrain to compile one submodule
+> for each dimension $d$. So I put up my sleeves to provide a more flexible solution.
+
 #### Registering Feature Dimensions
 
 Due to limitations of the algorithm and CUDA, dimensionality of the feature vector must be known at compile time.
@@ -36,8 +40,9 @@ can be computed as follows:
 d_{max} = \left\lfloor \frac{12 \cdot 1024 - 7 \cdot b^2}{b^2} \right \rfloor
 ```
 
-If you don't want this behavior, you can split $f$ into multiple chunks and splat them
-with a desired block size, then concatenate the rendered features outputs afterward.
+> [!TIP]
+> If you don't want this behavior, you can split $f$ into multiple chunks and splat them
+> with a desired block size, then concatenate the rendered features outputs afterward.
 
 ### Installation
 
