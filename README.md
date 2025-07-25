@@ -31,7 +31,7 @@ The maximum dimension that fits a block resolution $b$ (assuming that block size
 can be computed as follows:
 
 ```math
-d_{max} = \frac{12 \cdot 1024 - 7 \cdot b^2}{b^2}
+d_{max} = \left\lfloor \frac{12 \cdot 1024 - 7 \cdot b^2}{b^2} \right \rfloor
 ```
 
 If you don't want this behavior, you can split $f$ into multiple chunks and splat them
